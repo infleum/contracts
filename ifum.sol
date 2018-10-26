@@ -5,8 +5,6 @@ import "./openzeppelin-solidity/contracts/token/ERC20/ERC20Burnable.sol";
 
 contract IFUM is Ownable, ERC20Burnable {
 
-    string public version = "0.1.00";
-
     string public name;
     
     string public symbol;
