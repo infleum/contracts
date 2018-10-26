@@ -32,7 +32,7 @@ contract IFUMCrowdsale is Ownable, Pausable {
      * @param wallet The address for receiving ether.
      */
     function setWallet(address wallet) public onlyOwner {
-        require(wallet != address(0));
+        require(wallet != address(0), "Invalid address");
         address prev = _wallet;
         _wallet = wallet;
         emit SetWallet(prev, wallet);
@@ -43,7 +43,7 @@ contract IFUMCrowdsale is Ownable, Pausable {
      * @param newToken The address of IFUM token contract.
      */
     function setTokenContract(IFUM newToken) public onlyOwner {
-        require(newToken != address(0));
+        require(newToken != address(0), "Invalid address");
         address prev = token;
         token = newToken;
         emit SetTokenContract(prev, newToken);
@@ -53,8 +53,11 @@ contract IFUMCrowdsale is Ownable, Pausable {
      * @dev If the contact receives ether in Presale or Crowdsale stage, send ether to _wallet automatically.
      */
     function () external payable {
-        require(msg.value != 0);
-        require(stage == Stage.Presale || stage == Stage.Crowdsale);
+        require(msg.value != 0, "You must transfer more than 0 ether.");
+        require(
+            stage == Stage.Presale || stage == Stage.Crowdsale,
+            "It is not a payable stage."
+        );
         _wallet.transfer(msg.value);
     }
 
@@ -64,7 +67,10 @@ contract IFUMCrowdsale is Ownable, Pausable {
      * @param value The amount to be transferred.
      */
     function transfer(address to, uint256 value) public onlyOwner {
-        require(stage == Stage.Distribution);
+        require(
+            stage == Stage.Presale || stage == Stage.Crowdsale || stage == Stage.Distribution,
+            "Is is not a transferrable stage."
+        );
         token.safeTransfer(to, value);
     }
 
@@ -72,7 +78,7 @@ contract IFUMCrowdsale is Ownable, Pausable {
      * @dev At the Distribution stage, burn all IFUM tokens owned by the contract.
      */
     function burnAll() public onlyOwner {
-        require(stage == Stage.Distribution);
+        require(stage == Stage.Distribution, "Is is not a burnable stage.");
         token.burn(token.balanceOf(this));
     }
 
@@ -87,7 +93,7 @@ contract IFUMCrowdsale is Ownable, Pausable {
      */
     function setNextStage() public onlyOwner {
         uint8 intStage = uint8(stage);
-        require(intStage < uint8(Stage.Finished));
+        require(intStage < uint8(Stage.Finished), "It is the last stage.");
         intStage++;
         stage = Stage(intStage);
         if (stage == Stage.Finished) {

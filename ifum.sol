@@ -33,7 +33,7 @@ contract IFUM is Ownable, ERC20Burnable {
     }
 
     function unfreeze() public {
-        require(msg.sender == _crowdsale);
+        require(msg.sender == _crowdsale, "Only crowdsale contract can unfreeze this token.");
         _freezed = false;
     }
 
@@ -42,18 +42,19 @@ contract IFUM is Ownable, ERC20Burnable {
     }
 
     modifier test(address account) {
-        require(!isLocked(account) && (!_freezed || _crowdsale == account));
+        require(!isLocked(account), "It is a locked account.");
+        require(!_freezed || _crowdsale == account, "A token is frozen or not crowdsale contract executes this function.");
         _;
     }
 
     function lockAccount(address account) public onlyOwner {
-        require(!isLocked(account));
+        require(!isLocked(account), "It is already a locked account.");
         _locked[account] = true;
         emit LockAccount(account);
     }
 
     function unlockAccount(address account) public onlyOwner {
-        require(isLocked(account));
+        require(isLocked(account), "It is already a unlocked account.");
         _locked[account] = false;
         emit UnlockAccount(account);
     }
